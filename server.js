@@ -25,6 +25,43 @@ app.get("/health", (req, res) => {
   res.json({ status: "ok" });
 });
 
+// Verify SMTP credentials without sending a message.
+// Body: smtp_host, smtp_port, smtp_username, smtp_password
+app.post("/verify", async (req, res) => {
+  const { smtp_host, smtp_port, smtp_username, smtp_password } = req.body || {};
+
+  const missing = [];
+  if (!smtp_host) missing.push("smtp_host");
+  if (!smtp_port) missing.push("smtp_port");
+  if (!smtp_username) missing.push("smtp_username");
+  if (!smtp_password) missing.push("smtp_password");
+  if (missing.length) {
+    return res.status(400).json({ error: "Missing required fields: " + missing.join(", ") });
+  }
+
+  const transporter = nodemailer.createTransport({
+    host: smtp_host,
+    port: Number(smtp_port),
+    secure: Number(smtp_port) === 465,
+    auth: { user: smtp_username, pass: smtp_password },
+    connectionTimeout: 15000,
+    greetingTimeout: 15000,
+    socketTimeout: 15000,
+  });
+
+  try {
+    await transporter.verify();
+    await transporter.close();
+    return res.json({ success: true, message: "Connection verified successfully" });
+  } catch (err) {
+    return res.status(502).json({
+      success: false,
+      error: err.message,
+      code: err.code || null,
+    });
+  }
+});
+
 // Send an email using SMTP credentials supplied in the request body.
 // Body:
 //   smtp_host, smtp_port, smtp_username, smtp_password,
