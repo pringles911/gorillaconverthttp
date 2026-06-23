@@ -13,6 +13,6 @@
     "express": "^4.19.2",
     "nodemailer": "^6.9.14",
     "mailparser": "^3.7.2",
-    "imap": "^0.8.20"
+    "imap": "^0.9.3"
   }
 }
