@@ -310,7 +310,7 @@ async function parseEmail(emailBody) {
       const date = (parsed.date || new Date()).toISOString();
       const messageId = parsed.messageId || "";
       const inReplyTo = parsed.inReplyTo || "";
-      const references = (parsed.references || []).join(", ");
+      const references = Array.isArray(parsed.references) ? parsed.references.join(", ") : (parsed.references || "");
 
       resolve({
         from,
